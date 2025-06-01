@@ -1,0 +1,28 @@
+language: cpp
+compiler:
+  - g++
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y lcov
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - cmake --build .
+  - ctest
+
+after_success:
+  - lcov --directory . --capture --output-file coverage.info
+  - lcov --remove coverage.info '/usr/*' '*/tests/*' --output-file coverage.info
+  - lcov --list coverage.info
+  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+
+addons:
+  apt:
+    packages:
+      - cmake
+      - g++ 
+      - lcov
+
