@@ -1,0 +1,32 @@
+name: C++ CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: sudo apt update && sudo apt install -y cmake g++ lcov gcovr
+
+    - name: Configure
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+
+    - name: Build
+      run: cmake --build build
+
+    - name: Test
+      run: cd build && ctest --output-on-failure
+
+    - name: Generate Coverage Report
+      run: |
+        cd build
+        gcovr -r .. --html --html-details -o coverage.html
+        gcovr -r .. --xml -o coverage.xml
