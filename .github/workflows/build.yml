@@ -1,4 +1,4 @@
-name: C++ CI
+kname: C++ CI
 
 on:
   push:
@@ -14,7 +14,10 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Install dependencies
-      run: sudo apt update && sudo apt install -y cmake g++ lcov gcovr
+      run: |
+        sudo apt update
+        sudo apt install -y cmake g++ lcov gcovr nodejs npm
+        npm install -g coveralls
 
     - name: Configure
       run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
@@ -30,3 +33,10 @@ jobs:
         cd build
         gcovr -r .. --html --html-details -o coverage.html
         gcovr -r .. --xml -o coverage.xml
+
+    - name: Send coverage to Coveralls
+      run: |
+        cat build/coverage.xml | coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
