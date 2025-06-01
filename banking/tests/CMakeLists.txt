@@ -1,22 +1,25 @@
-# Добавляем исходники тестов
-add_executable(AccountTest 
-    AccountTest.cpp 
-    MockAccount.h 
+# Тест на Account
+add_executable(AccountTest
+    AccountTest.cpp
 )
 
-add_executable(TransactionTest 
-    TransactionTest.cpp 
-    MockTransaction.h 
+# Тест на Transaction
+add_executable(TransactionTest
+    TransactionTest.cpp
 )
 
-# Ссылаемся на библиотеку banking
-target_link_libraries(AccountTest banking GTest::GTest GTest::Main)
-target_link_libraries(TransactionTest banking GTest::GTest GTest::Main)
+# Подключаем библиотеку и GTest
+target_link_libraries(AccountTest
+    banking
+    GTest::gtest_main
+)
 
-# Устанавливаем флаг для покрытия кода
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+target_link_libraries(TransactionTest
+    banking
+    GTest::gtest_main
+)
 
-# Активируем тесты
+# Активируем автоматический поиск тестов
 include(GoogleTest)
 gtest_discover_tests(AccountTest)
 gtest_discover_tests(TransactionTest)
