@@ -1,37 +1,39 @@
-name: Coverage
+name: Coverage Report
 
 on:
   push:
     branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
   coverage:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Install tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install lcov
-          pip install coveralls
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y lcov cmake gcovr
 
-      - name: Build with coverage
-        run: |
-          mkdir build && cd build
-          cmake -DCODE_COVERAGE=ON ..
-          make
-          ctest
+    - name: Build project and run tests
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+        ctest
 
-      - name: Generate lcov report
-        run: |
-          cd build
-          lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info '/usr/*' '*/tests/*' --output-file coverage.info
+    - name: Generate lcov coverage
+      run: |
+        cd build
+        gcovr -r .. --gcov-executable=gcov --exclude-directories '_deps' --exclude-throw-branches --print-summary --output coverage.info --coveralls coverage.json
 
-      - name: Upload to Coveralls
-        run: |
-          coveralls --lcov-file build/coverage.info
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: build/coverage.info
